@@ -30,6 +30,8 @@ jobs:
   fmt:
     needs: [validate]
     runs-on: ubuntu-latest
+    env:
+      TERRAFORM_ENV_BASE64: ${{ secrets.TERRAFORM_ENV_BASE64 }}
     steps:
     - uses: actions/checkout@v4
 
@@ -44,6 +46,8 @@ jobs:
   tflint:
     needs: [validate]
     runs-on: ubuntu-latest
+    env:
+      TERRAFORM_ENV_BASE64: ${{ secrets.TERRAFORM_ENV_BASE64 }}
     steps:
       - uses: actions/checkout@v4
 
@@ -59,6 +63,8 @@ jobs:
   trivy:
     needs: [validate]
     runs-on: ubuntu-latest
+    env:
+      TERRAFORM_ENV_BASE64: ${{ secrets.TERRAFORM_ENV_BASE64 }}
     steps:
       - uses: actions/checkout@v4
 
