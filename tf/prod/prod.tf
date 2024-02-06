@@ -1,9 +1,8 @@
 terraform {
-  cloud {
-    organization = "sko"
-    workspaces {
-      name = "sko-cicd-prod"
-    }
+  backend "s3" {
+    bucket = "ping-terraform-demo"
+    key    = "prod"
+    region = "us-west-1"
   }
 }
 

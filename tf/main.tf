@@ -53,10 +53,7 @@ resource "pingone_environment" "environment" {
   type        = "SANDBOX"
   license_id  = data.pingone_licenses.internal.ids[0]
 
-  default_population {
-    name        = "My Population"
-    description = "My new population for users"
-  }
+
 
   service {
     type = "SSO"
@@ -70,8 +67,14 @@ resource "pingone_environment" "environment" {
 
 }
 
+resource "pingone_population_default" "default_population" {
+  environment_id = resource.pingone_environment.environment.id
+  name        = "My Population"
+  description = "My new population for users"
+}
+
 data "pingone_role" "identity_data_admin" {
-  name = "Identity Data Admin"
+  name = "DaVinci Admin"
 }
 
 data "pingone_role" "environment_admin" {
@@ -142,13 +145,13 @@ resource "pingone_mfa_policy" "standard" {
     enabled = true
   }
 
-  security_key {
-    enabled = true
-  }
+  # security_key {
+  #   enabled = true
+  # }
 
-  platform {
-    enabled = true
-  }
+  # platform {
+  #   enabled = true
+  # }
 
   sms {
     enabled = false
@@ -193,126 +196,111 @@ resource "davinci_variable" "agreement" {
   mutable = false
 }
 
-resource "davinci_connection" "mfa" {
-  depends_on     = [data.davinci_connections.all]
-  environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
-  connector_id   = "pingOneMfaConnector"
-  name           = "PingOne MFA"
-  properties {
-    name  = "clientId"
-    value = resource.pingone_application.worker.oidc_options[0].client_id
-  }
-  properties {
-    name  = "clientSecret"
-    value = resource.pingone_application.worker.oidc_options[0].client_secret
-  }
-  properties {
-    name  = "envId"
-    value = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
-  }
-  properties {
-    name  = "policyId"
-    value = resource.pingone_mfa_policy.standard.id
-  }
-  properties {
-    name  = "region"
-    value = coalesce(
-      resource.pingone_environment.environment.region == "Europe" ? "EU" :"",
-      resource.pingone_environment.environment.region == "AsiaPacific" ? "AP" :"",
-      resource.pingone_environment.environment.region == "Canada" ? "CA" :"",
-      resource.pingone_environment.environment.region == "NorthAmerica" ? "NA" :"",
-    )
-  }
-}
+# resource "davinci_connection" "mfa" {
+#   depends_on     = [data.davinci_connections.all]
+#   environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
+#   connector_id   = "pingOneMfaConnector"
+#   name           = "PingOne MFA"
+#   property {
+#     name  = "clientId"
+#     value = resource.pingone_application.worker.oidc_options[0].client_id
+#   }
+#   property {
+#     name  = "clientSecret"
+#     value = resource.pingone_application.worker.oidc_options[0].client_secret
+#   }
+#   property {
+#     name  = "envId"
+#     value = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
+#   }
+#   property {
+#     name  = "policyId"
+#     value = resource.pingone_mfa_policy.standard.id
+#   }
+#   property {
+#     name  = "region"
+#     value = coalesce(
+#       resource.pingone_environment.environment.region == "Europe" ? "EU" :"",
+#       resource.pingone_environment.environment.region == "AsiaPacific" ? "AP" :"",
+#       resource.pingone_environment.environment.region == "Canada" ? "CA" :"",
+#       resource.pingone_environment.environment.region == "NorthAmerica" ? "NA" :"",
+#     )
+#   }
+# }
 
-resource "davinci_connection" "node" {
-  depends_on     = [data.davinci_connections.all]
-  environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
-  connector_id   = "nodeConnector"
-  name           = "Node"
-}
+# resource "davinci_connection" "node" {
+#   depends_on     = [data.davinci_connections.all]
+#   environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
+#   connector_id   = "nodeConnector"
+#   name           = "Node"
+# }
 
 resource "davinci_flow" "bxi_registration" {
   environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
   flow_json = file("${path.module}/BXI-Registration.json")
-  depends_on = [data.davinci_connections.all]
-  connections {
-    connection_name = "PingOne"
-    connection_id = "94141bf2f1b9b59a5f5365ff135e02bb"
+  depends_on = [data.davinci_connections.all, davinci_variable.population, davinci_variable.agreement]
+
+  connection_link {
+    name = "PingOne"
+    id = "94141bf2f1b9b59a5f5365ff135e02bb"
   }
-  connections {
-    connection_name = "Http"
-    connection_id = "867ed4363b2bc21c860085ad2baa817d"
+  connection_link {
+    name = "Http"
+    id = "867ed4363b2bc21c860085ad2baa817d"
   }
-  connections {
-    connection_name = "Annotation"
-    connection_id = "921bfae85c38ed45045e07be703d86b8"
+  connection_link {
+    name = "Annotation"
+    id = "921bfae85c38ed45045e07be703d86b8"
   }
-  connections {
-    connection_name = "Variables"
-    connection_id = "06922a684039827499bdbdd97f49827b"
+  connection_link {
+    name = "Variables"
+    id = "06922a684039827499bdbdd97f49827b"
   }
-  connections {
-    connection_name = "Error Customize"
-    connection_id = "6d8f6f706c45fd459a86b3f092602544"
+  connection_link {
+    name = "Error Message"
+    id = "53ab83a4a4ab919d9f2cb02d9e111ac8"
   }
-  connections {
-    connection_name = resource.davinci_connection.mfa.name
-    connection_id = resource.davinci_connection.mfa.id
-  }
-  variables {
-    variable_id = resource.davinci_variable.population.id
-    variable_name = resource.davinci_variable.population.name
-  }
-  variables {
-    variable_id = resource.davinci_variable.agreement.id
-    variable_name = resource.davinci_variable.agreement.name
+  connection_link {
+    name = "PingOne MFA"
+    id = "b72bd44e6be8180bd5988ac74cd9c949"
   }
 }
 
 resource "davinci_flow" "bxi_authentication" {
   environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
   flow_json = file("${path.module}/BXI-Authentication.json")
-  depends_on = [data.davinci_connections.all]
-  connections {
-    connection_name = "PingOne"
-    connection_id = "94141bf2f1b9b59a5f5365ff135e02bb"
+  depends_on = [data.davinci_connections.all, davinci_variable.population, davinci_variable.agreement]
+  connection_link {
+    name = "PingOne"
+    id = "94141bf2f1b9b59a5f5365ff135e02bb"
   }
-  connections {
-    connection_name = "Http"
-    connection_id = "867ed4363b2bc21c860085ad2baa817d"
+  connection_link {
+    name = "Http"
+    id = "867ed4363b2bc21c860085ad2baa817d"
   }
-  connections {
-    connection_name = "Annotation"
-    connection_id = "921bfae85c38ed45045e07be703d86b8"
+  connection_link {
+    name = "Annotation"
+    id = "921bfae85c38ed45045e07be703d86b8"
   }
-  connections {
-    connection_name = "Variables"
-    connection_id = "06922a684039827499bdbdd97f49827b"
+  connection_link {
+    name = "Variables"
+    id = "06922a684039827499bdbdd97f49827b"
   }
-  connections {
-    connection_name = "Error Customize"
-    connection_id = "6d8f6f706c45fd459a86b3f092602544"
+  connection_link {
+    name = "Error Message"
+    id = "53ab83a4a4ab919d9f2cb02d9e111ac8"
   }
-  connections {
-    connection_name = "Functions"
-    connection_id = "de650ca45593b82c49064ead10b9fe17"
+  connection_link {
+    name = "Functions"
+    id = "de650ca45593b82c49064ead10b9fe17"
   }
-  connections {
-    connection_id = resource.davinci_connection.node.id
-    connection_name = resource.davinci_connection.node.name
+  connection_link {
+    id = "e7eae662d2ca276e4c6f097fc36a3bb1"
+    name = "Node"
   }
-  connections {
-    connection_name = resource.davinci_connection.mfa.name
-    connection_id = resource.davinci_connection.mfa.id
-  }
-  variables {
-    variable_id = resource.davinci_variable.population.id
-    variable_name = resource.davinci_variable.population.name
-  }
-  variables {
-    variable_id = resource.davinci_variable.agreement.id
-    variable_name = resource.davinci_variable.agreement.name
+  connection_link {
+    name = "PingOne MFA"
+    id = "b72bd44e6be8180bd5988ac74cd9c949"
   }
 }
 
@@ -328,22 +316,6 @@ resource "davinci_application" "bxi_app" {
       enforce_signed_request_openid = false
     }
   }
-  policies {
-    name = "Registration"
-    policy_flows {
-      flow_id    = resource.davinci_flow.bxi_registration.flow_id
-      version_id = -1
-      weight     = 100
-    }
-  }
-  policies {
-    name = "Authentication"
-    policy_flows {
-      flow_id    = resource.davinci_flow.bxi_authentication.flow_id
-      version_id = -1
-      weight     = 100
-    }
-  }
   saml {
     values {
       enabled                = false
@@ -356,15 +328,37 @@ resource "davinci_application" "bxi_app" {
   ]
 }
 
+resource "davinci_application_flow_policy" "registration" {
+    environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
+    application_id = resource.davinci_application.bxi_app.id
+    name = "Registration"
+    policy_flow {
+      flow_id    = resource.davinci_flow.bxi_registration.id
+      version_id = -1
+      weight     = 100
+    }
+}
+
+resource "davinci_application_flow_policy" "authentication" {
+    environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
+    application_id = resource.davinci_application.bxi_app.id
+    name = "Authentication"
+    policy_flow {
+      flow_id    = resource.davinci_flow.bxi_authentication.id
+      version_id = -1
+      weight     = 100
+    }
+}
+
 output "app_policies" {
-  value = {for i in resource.davinci_application.bxi_app.policies : "${i.name}" => i.policy_id}
-  sensitive = true
+  # value = {for i in resource.davinci_application.bxi_app.policies : "${i.name}" => i.policy_id}
+  value = [{"bxi_registration_policy_id"=resource.davinci_application_flow_policy.registration.id}, {"bxi_login_policy_id"=resource.davinci_application_flow_policy.authentication.id}]
+  # sensitive = true
 }
 
 output "bxi_api_key" {
   value = resource.davinci_application.bxi_app.api_keys.prod
-  sensitive = true
-
+  # sensitive = true
 }
 
 output "bxi_api_url" {

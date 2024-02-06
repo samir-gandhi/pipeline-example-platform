@@ -31,7 +31,7 @@ To fully experience this Lab:
 
 ## Project Base Setup
 Click "Use this template" :wink:
-On the next screen be sure to click "include all branches". Then name the `sko-tf-bifrost`
+On the next screen be sure to click "include all branches". Then name the `ping-terraform-demo`
 
 The repo will be created in your Github account. 
 
@@ -42,7 +42,7 @@ git clone <repo-url>
 ```
 
 ```
-cd sko-tf-bifrost
+cd ping-terraform-demo
 ```
 
 First we need to set up variables. There is a variable template file `secrets` (ha, you really thought I committed my secrets to git huh?). Copy this file to `localvars` <- this name is actually important.
@@ -57,7 +57,7 @@ You're now ready to deploy dev!
 
 ## Deploy Dev
 
-From the root of the repo (e.g. `sko-tf-bifrost` folder):
+From the root of the repo (e.g. `ping-terraform-demo` folder):
 
 ```
 source localvars
