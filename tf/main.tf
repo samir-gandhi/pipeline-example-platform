@@ -196,45 +196,6 @@ resource "davinci_variable" "agreement" {
   mutable = false
 }
 
-# resource "davinci_connection" "mfa" {
-#   depends_on     = [data.davinci_connections.all]
-#   environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
-#   connector_id   = "pingOneMfaConnector"
-#   name           = "PingOne MFA"
-#   property {
-#     name  = "clientId"
-#     value = resource.pingone_application.worker.oidc_options[0].client_id
-#   }
-#   property {
-#     name  = "clientSecret"
-#     value = resource.pingone_application.worker.oidc_options[0].client_secret
-#   }
-#   property {
-#     name  = "envId"
-#     value = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
-#   }
-#   property {
-#     name  = "policyId"
-#     value = resource.pingone_mfa_policy.standard.id
-#   }
-#   property {
-#     name  = "region"
-#     value = coalesce(
-#       resource.pingone_environment.environment.region == "Europe" ? "EU" :"",
-#       resource.pingone_environment.environment.region == "AsiaPacific" ? "AP" :"",
-#       resource.pingone_environment.environment.region == "Canada" ? "CA" :"",
-#       resource.pingone_environment.environment.region == "NorthAmerica" ? "NA" :"",
-#     )
-#   }
-# }
-
-# resource "davinci_connection" "node" {
-#   depends_on     = [data.davinci_connections.all]
-#   environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
-#   connector_id   = "nodeConnector"
-#   name           = "Node"
-# }
-
 resource "davinci_flow" "bxi_registration" {
   environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
   flow_json = file("${path.module}/BXI-Registration.json")

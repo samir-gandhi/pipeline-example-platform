@@ -1,11 +1,11 @@
 output "app_policies" {
   value = "${module.bxi.app_policies}"
-  # sensitive = true
+  sensitive = true
 }
 
 output "bxi_api_key" {
   value = "${module.bxi.bxi_api_key}"
-  # sensitive = true
+  sensitive = true
 }
 
 output "bxi_api_url" {
