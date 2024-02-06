@@ -314,12 +314,12 @@ resource "davinci_application_flow_policy" "authentication" {
 output "app_policies" {
   # value = {for i in resource.davinci_application.bxi_app.policies : "${i.name}" => i.policy_id}
   value = [{"bxi_registration_policy_id"=resource.davinci_application_flow_policy.registration.id}, {"bxi_login_policy_id"=resource.davinci_application_flow_policy.authentication.id}]
-  # sensitive = true
+  sensitive = true
 }
 
 output "bxi_api_key" {
   value = resource.davinci_application.bxi_app.api_keys.prod
-  # sensitive = true
+  sensitive = true
 }
 
 output "bxi_api_url" {
