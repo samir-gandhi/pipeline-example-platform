@@ -1,3 +1,11 @@
+terraform {
+  backend "s3" {
+    bucket = "ping-terraform-demo"
+    key    = "dev"
+    region = "us-west-1"
+  }
+}
+
 module "bxi" {
   source = "../"
   pingone_username = var.pingone_username
