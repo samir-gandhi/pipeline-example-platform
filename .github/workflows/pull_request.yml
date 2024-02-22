@@ -27,21 +27,21 @@ jobs:
         terraform -chdir=${_tfdir} init
         terraform -chdir=${_tfdir} validate
 
-  # fmt:
-  #   needs: [validate]
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     TERRAFORM_ENV_BASE64: ${{ secrets.TERRAFORM_ENV_BASE64 }}
-  #   steps:
-  #   - uses: actions/checkout@v4
+  fmt:
+    needs: [validate]
+    runs-on: ubuntu-latest
+    env:
+      TERRAFORM_ENV_BASE64: ${{ secrets.TERRAFORM_ENV_BASE64 }}
+    steps:
+    - uses: actions/checkout@v4
 
-  #   - name: fmt-check
-  #     run: |
-  #       _tfdir=tf/prod
-  #       echo $TERRAFORM_ENV_BASE64 | base64 -d > tfvars
-  #       source tfvars
-  #       terraform -chdir=${_tfdir} init
-  #       terraform -chdir=${_tfdir} fmt -recursive -check .
+    - name: fmt-check
+      run: |
+        _tfdir=tf/prod
+        echo $TERRAFORM_ENV_BASE64 | base64 -d > tfvars
+        source tfvars
+        terraform -chdir=${_tfdir} init
+        terraform -chdir=${_tfdir} fmt -recursive -check .
 
   tflint:
     needs: [validate]

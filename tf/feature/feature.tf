@@ -1,10 +1,4 @@
-terraform {
-  backend "s3" {
-    bucket = "ping-terraform-demo"
-    key    = "dev"
-    region = "us-west-1"
-  }
-}
+# uses local backend
 
 module "bxi" {
   source = "../"

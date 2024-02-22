@@ -73,8 +73,12 @@ resource "pingone_population_default" "default_population" {
   description = "My new population for users"
 }
 
-data "pingone_role" "identity_data_admin" {
+data "pingone_role" "davinci_admin" {
   name = "DaVinci Admin"
+}
+
+data "pingone_role" "identity_data_admin" {
+  name = "Identity Data Admin"
 }
 
 data "pingone_role" "environment_admin" {
@@ -86,7 +90,14 @@ data "pingone_user" "admin_user" {
   username       = var.pingone_username
 }
 
-resource "pingone_role_assignment_user" "admin_sso" {
+resource "pingone_role_assignment_user" "davinci_admin_sso" {
+  environment_id       = var.pingone_environment_id
+  user_id              = data.pingone_user.admin_user.id
+  role_id              = data.pingone_role.davinci_admin.id
+  scope_environment_id = resource.pingone_environment.environment.id
+}
+
+resource "pingone_role_assignment_user" "identity_data_admin_sso" {
   environment_id       = var.pingone_environment_id
   user_id              = data.pingone_user.admin_user.id
   role_id              = data.pingone_role.identity_data_admin.id
@@ -119,7 +130,14 @@ resource "pingone_application" "worker" {
   }
 }
 
-resource "pingone_application_role_assignment" "worker_app_identity_admin_role" {
+resource "pingone_application_role_assignment" "worker_app_davinci_admin_role" {
+  environment_id       = pingone_environment.environment.id
+  application_id       = pingone_application.worker.id
+  role_id              = data.pingone_role.davinci_admin.id
+  scope_environment_id = pingone_environment.environment.id
+}
+
+resource "pingone_application_role_assignment" "worker_app_identity_data_admin_role" {
   environment_id       = pingone_environment.environment.id
   application_id       = pingone_application.worker.id
   role_id              = data.pingone_role.identity_data_admin.id
@@ -168,14 +186,14 @@ resource "pingone_mfa_policy" "standard" {
 }
 
 data "davinci_connections" "all" {
-  environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
+  environment_id = resource.pingone_role_assignment_user.davinci_admin_sso.scope_environment_id
   depends_on = [
     resource.pingone_role_assignment_user.environment_admin_sso
   ]
 }
 
 resource "davinci_variable" "population" {
-  environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
+  environment_id = resource.pingone_role_assignment_user.davinci_admin_sso.scope_environment_id
   depends_on     = [data.davinci_connections.all]
   name = "populationId"
   context = "company"
@@ -186,7 +204,7 @@ resource "davinci_variable" "population" {
 }
 
 resource "davinci_variable" "agreement" {
-  environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
+  environment_id = resource.pingone_role_assignment_user.davinci_admin_sso.scope_environment_id
   depends_on     = [data.davinci_connections.all]
   name = "agreementId"
   context = "company"
@@ -197,7 +215,7 @@ resource "davinci_variable" "agreement" {
 }
 
 resource "davinci_flow" "bxi_registration" {
-  environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
+  environment_id = resource.pingone_role_assignment_user.davinci_admin_sso.scope_environment_id
   flow_json = file("${path.module}/BXI-Registration.json")
   depends_on = [data.davinci_connections.all, davinci_variable.population, davinci_variable.agreement]
 
@@ -228,7 +246,7 @@ resource "davinci_flow" "bxi_registration" {
 }
 
 resource "davinci_flow" "bxi_authentication" {
-  environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
+  environment_id = resource.pingone_role_assignment_user.davinci_admin_sso.scope_environment_id
   flow_json = file("${path.module}/BXI-Authentication.json")
   depends_on = [data.davinci_connections.all, davinci_variable.population, davinci_variable.agreement]
   connection_link {
@@ -266,7 +284,7 @@ resource "davinci_flow" "bxi_authentication" {
 }
 
 resource "davinci_application" "bxi_app" {
-  environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
+  environment_id = resource.pingone_role_assignment_user.davinci_admin_sso.scope_environment_id
   name           = "BXI App"
   oauth {
     enabled = true
@@ -290,7 +308,7 @@ resource "davinci_application" "bxi_app" {
 }
 
 resource "davinci_application_flow_policy" "registration" {
-    environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
+    environment_id = resource.pingone_role_assignment_user.davinci_admin_sso.scope_environment_id
     application_id = resource.davinci_application.bxi_app.id
     name = "Registration"
     policy_flow {
@@ -301,7 +319,7 @@ resource "davinci_application_flow_policy" "registration" {
 }
 
 resource "davinci_application_flow_policy" "authentication" {
-    environment_id = resource.pingone_role_assignment_user.admin_sso.scope_environment_id
+    environment_id = resource.pingone_role_assignment_user.davinci_admin_sso.scope_environment_id
     application_id = resource.davinci_application.bxi_app.id
     name = "Authentication"
     policy_flow {
