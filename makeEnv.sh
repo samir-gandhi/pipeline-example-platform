@@ -51,8 +51,8 @@ for i in BXI_API_URL BXI_SDK_TOKEN_URL BXI_API_KEY BXI_COMPANY_ID ; do
 done
 
 { 
-  printf "BXI_LOGIN_POLICY_ID=%s\n" "$(jq -r '.outputs.app_policies.value.Authentication' ${_envPath}/terraform.tfstate)"
-  printf "BXI_REGISTRATION_POLICY_ID=%s\n" "$(jq -r '.outputs.app_policies.value.Registration' ${_envPath}/terraform.tfstate)"
+  printf "BXI_LOGIN_POLICY_ID=%s\n" "$(jq -r '.outputs.app_policies.value[] | select(has("bxi_login_policy_id")) | .bxi_login_policy_id' ${_envPath}/terraform.tfstate)"
+  printf "BXI_REGISTRATION_POLICY_ID=%s\n" "$(jq -r '.outputs.app_policies.value[] | select(has("bxi_registration_policy_id")) | .bxi_registration_policy_id' ${_envPath}/terraform.tfstate)"
   printf "BXI_ACTIVE_VERTICAL=company\n"
   printf "BXI_DV_JS_URL=https://assets.pingone.com/davinci/latest/davinci.js\n"
 } >> ${_envFileName}
