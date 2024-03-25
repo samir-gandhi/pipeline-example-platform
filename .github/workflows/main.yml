@@ -4,8 +4,9 @@ on:
     branches:
       - 'main'
     paths:
-      - 'tf/**'
-      - '!tf/dev/**'
+      - 'terraform/**'
+      - '!terraform/feature/**'
+      - '!terraform/test/**'
       - '.github/**'
 
 jobs:

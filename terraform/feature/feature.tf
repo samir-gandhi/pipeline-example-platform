@@ -1,6 +1,6 @@
 # uses local backend
 
-module "bxi" {
+module "base" {
   source = "../"
   pingone_username = var.pingone_username
   pingone_password = var.pingone_password
@@ -8,10 +8,7 @@ module "bxi" {
   pingone_client_id = var.pingone_client_id
   pingone_client_secret = var.pingone_client_secret
   pingone_environment_id = var.pingone_environment_id
-  environment_name = var.environment_name
-}
-
-variable "environment_name" {
-  description = "name that will be used when creating PingOne Environment"
-  default = "sko-cicd-dev"
+  pingone_environment_name = var.pingone_environment_name
+  pingone_environment_type = var.pingone_environment_type
+  pingone_license_id = var.pingone_license_id
 }

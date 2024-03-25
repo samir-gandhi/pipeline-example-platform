@@ -1,0 +1,20 @@
+variable "pingone_username" {
+}
+variable "pingone_password" {
+}
+variable "pingone_region" {
+}
+variable "pingone_client_id" {
+}
+variable "pingone_client_secret" {
+}
+variable "pingone_environment_id" {
+}
+variable "pingone_environment_name" {
+  description = "name that will be used when creating PingOne Environment"
+  default = "PingOne TEST Environment for Terraform"
+}
+variable "pingone_environment_type" {
+}
+variable "pingone_license_id" {
+}
