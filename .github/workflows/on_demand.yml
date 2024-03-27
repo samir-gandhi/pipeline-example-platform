@@ -2,7 +2,10 @@ name: Feature Deploy
 on: 
   push:
     branches:
-      - '*feature-*'
+      - '!production'
+      - '!main'
+      - '!staging'
+      - '!qa'
     paths:
       - 'terraform/**'
       - '.github/**'
