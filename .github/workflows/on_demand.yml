@@ -20,7 +20,7 @@ jobs:
     - run: |-
         _tfdir=terraform/feature
         echo $TERRAFORM_ENV_BASE64 | base64 -d > tfvars
-        export TF_VAR_pingone_environment_name="$(echo "${GITHUB_REF}" | sed -e "s#refs/heads/##g")"
         source tfvars
+        export TF_VAR_pingone_environment_name="$(echo "${GITHUB_REF}" | sed -e "s#refs/heads/##g")"
         terraform -chdir=${_tfdir} init
         terraform -chdir=${_tfdir} apply --auto-approve
