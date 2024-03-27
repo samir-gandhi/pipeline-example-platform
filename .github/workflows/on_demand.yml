@@ -1,17 +1,10 @@
 name: Feature Deploy
 on: 
-  push:
-    branches:
-      - '!production'
-      - '!main'
-      - '!staging'
-      - '!qa'
-    paths:
-      - 'terraform/**'
-      - '.github/**'
+  create:
 
 jobs:
   deploy:
+    if: ${{ !contains(github.ref, 'refs/heads/main/') && !contains(github.ref, 'refs/heads/qa/') && !contains(github.ref, 'refs/heads/staging/') && !contains(github.ref, 'refs/heads/production/')}}
     name: Deploy
     runs-on: ubuntu-latest
     timeout-minutes: 5
