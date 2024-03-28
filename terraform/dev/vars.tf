@@ -25,3 +25,15 @@ variable "pingone_environment_type" {
 variable "pingone_license_id" {
   default = ""
 }
+
+### dev on demand vars
+variable "tf_state_bucket" {
+  default = "ping-terraform-demo"
+}
+
+variable "tf_state_region" {
+  default = "us-west-1"
+}
+
+variable "tf_state_key" {
+}

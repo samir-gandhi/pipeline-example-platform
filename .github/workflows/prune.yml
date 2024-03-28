@@ -1,17 +1,17 @@
-name: Feature Deploy
-on: 
-  create:
-  push:
-    branches-ignore:
-      - main
-      - qa
-      - staging
-      - production
+name: Delete Feature Environment
 
+on: 
+  delete:
+    branches-ignore:
+      - 'main'
+      - 'qa'
+      - 'staging'
+      - 'production'
+      - 'test'
 
 jobs:
-  deploy:
-    if: ${{ !contains(github.event.commits[0].message, '[skip ci]') && !contains(github.ref, 'refs/heads/main/') && !contains(github.ref, 'refs/heads/qa/') && !contains(github.ref, 'refs/heads/staging/') && !contains(github.ref, 'refs/heads/production/')}}
+  prune:
+    if: ${{ !contains(github.ref, 'refs/heads/main/') && !contains(github.ref, 'refs/heads/qa/') && !contains(github.ref, 'refs/heads/staging/') && !contains(github.ref, 'refs/heads/production/')}}
     name: Deploy
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -21,9 +21,11 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v3
     - uses: hashicorp/setup-terraform@v2
+      with:
+        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
     - run: |-
-        _tfdir=terraform/dev
+        _tfdir=terraform/feature
         echo $TERRAFORM_ENV_BASE64 | base64 -d > tfvars
         source tfvars
         export TF_VAR_pingone_environment_name="$(echo "${GITHUB_REF}" | sed -e "s#refs/heads/##g")"
@@ -31,4 +33,4 @@ jobs:
           -backend-config="bucket=$TF_VAR_tf_state_bucket" \
           -backend-config="region=$TF_VAR_tf_state_region" \
           -backend-config="key=$TF_VAR_tf_state_key"
-        terraform -chdir=${_tfdir} apply --auto-approve
+        terraform -chdir=${_tfdir} destroy --auto-approve

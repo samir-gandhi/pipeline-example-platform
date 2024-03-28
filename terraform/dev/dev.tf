@@ -1,8 +1,13 @@
 terraform {
-  backend "s3" {
-    bucket = "ping-terraform-demo"
-    key    = "dev"
-    region = "us-west-1"
+  backend "s3" {}
+}
+
+data "terraform_remote_state" "state" {
+  backend = "s3"
+  config {
+    bucket     = "ping-terraform-demo"
+    region     = "us-west-1"
+    key        = "feature/${var.pingone_environment_name}/terraform.tfstate"
   }
 }
 

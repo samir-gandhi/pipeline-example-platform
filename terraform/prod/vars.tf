@@ -18,6 +18,7 @@ variable "pingone_environment_id" {
 }
 variable "pingone_environment_name" {
   description = "name that will be used when creating PingOne Environment"
+  default = "Platform-PROD"
 }
 variable "pingone_environment_type" {
   default = ""
