@@ -25,7 +25,7 @@ jobs:
         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
     - run: |-
-        _tfdir=terraform/feature
+        _tfdir=terraform/dev
         echo $TERRAFORM_ENV_BASE64 | base64 -d > tfvars
         source tfvars
         export TF_VAR_pingone_environment_name="$(echo "${GITHUB_REF}" | sed -e "s#refs/heads/##g")"
